@@ -12,5 +12,4 @@ Workers: id, name, position, avatar (img).
 7) CRUD операции с сущностями Workers. Не забыть показывать краткую информацию по задачам, назначенным на исполнителя.
 Применяемые технологии: многопоточность, jdbcTemplate (без ORM), Spring Boot, SQL
 
-
-https://www.bezkoder.com/spring-boot-jdbctemplate-crud-example/
+https://www.bezkoder.com/spring-boot-jdbctemplate-postgresql-example/

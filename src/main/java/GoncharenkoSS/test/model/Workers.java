@@ -1,4 +1,4 @@
-package GoncharenkoSS.test.models;
+package GoncharenkoSS.test.model;
 
 public class Workers {
     private int id;
@@ -6,8 +6,8 @@ public class Workers {
     private String position;
     private String avatar;
 
-    public Workers(int id, String name, String position, String avatar) {
-        this.id = id;
+    public Workers(String name, String position, String avatar) {
+
         this.name = name;
         this.position = position;
         this.avatar = avatar;
@@ -44,5 +44,15 @@ public class Workers {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    @Override
+    public String toString() {
+        return "Workers{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", position='" + position + '\'' +
+                ", avatar='" + avatar + '\'' +
+                '}';
     }
 }

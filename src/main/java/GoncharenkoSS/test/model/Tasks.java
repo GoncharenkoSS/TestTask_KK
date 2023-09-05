@@ -1,4 +1,4 @@
-package GoncharenkoSS.test.models;
+package GoncharenkoSS.test.model;
 
 public class Tasks {
     private int id;
@@ -6,9 +6,9 @@ public class Tasks {
     private String description;
     private String time;
     private String status;
-    private String performer;
+    private int performer;
 
-    public Tasks(int id, String title, String description, String time, String status, String performer) {
+    public Tasks(int id, String title, String description, String time, String status, int performer) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -58,11 +58,11 @@ public class Tasks {
         this.status = status;
     }
 
-    public String getPerformer() {
+    public int getPerformer() {
         return performer;
     }
 
-    public void setPerformer(String performer) {
+    public void setPerformer(int performer) {
         this.performer = performer;
     }
 }
