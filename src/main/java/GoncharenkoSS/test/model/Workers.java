@@ -1,10 +1,13 @@
 package GoncharenkoSS.test.model;
 
+import java.util.List;
+
 public class Workers {
     private int id;
     private String name;
     private String position;
     private String avatar;
+    private List<ShortTask> listTasks;
 
     public Workers(String name, String position, String avatar) {
 
@@ -46,6 +49,14 @@ public class Workers {
         this.avatar = avatar;
     }
 
+    public List<ShortTask> getListTasks() {
+        return listTasks;
+    }
+
+    public void setListTasks(List<ShortTask> listTasks) {
+        this.listTasks = listTasks;
+    }
+
     @Override
     public String toString() {
         return "Workers{" +
@@ -53,6 +64,7 @@ public class Workers {
                 ", name='" + name + '\'' +
                 ", position='" + position + '\'' +
                 ", avatar='" + avatar + '\'' +
+                ", listTasks=" + listTasks +
                 '}';
     }
 }

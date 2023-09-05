@@ -17,19 +17,19 @@ CREATE TABLE tasks
 );
 
 INSERT INTO workers VALUES
-('Andrey', 'Ànalyst', 'https://zavodstd.ru/wp-content/uploads/2022/09/Keh7cjW4YKU.jpg');
+    (1,'Andrey', 'Ànalyst', 'https://zavodstd.ru/wp-content/uploads/2022/09/Keh7cjW4YKU.jpg');
 
 INSERT INTO workers VALUES
-('Michail', 'Builder', 'https://cdn-edge.kwork.ru/pics/t3/73/17308339-1635228873.jpg');
+    (2,'Michail', 'Builder', 'https://cdn-edge.kwork.ru/pics/t3/73/17308339-1635228873.jpg');
 
 INSERT INTO workers VALUES
-('Sergey', 'Programmer', 'https://www.emedia-informatique.com/wp-content/uploads/2015/03/contact.jpg');
+    (3, 'Sergey', 'Programmer', 'https://www.emedia-informatique.com/wp-content/uploads/2015/03/contact.jpg');
 
 INSERT INTO tasks VALUES
-('Calculate', 'Calculate the area of a cube', '24 hour', 'in work', 2);
+    (1, 'Calculate', 'Calculate the area of a cube', '24 hour', 'in work', 1);
 
 INSERT INTO tasks VALUES
-('Write', 'Write a program', '72 hour', 'in work', 4);
+    (2, 'Write', 'Write a program', '72 hour', 'in work', 2);
 
 INSERT INTO tasks VALUES
-('Building', 'Building house', '6 mouth', 'in work', 3);
+    (3, 'Building', 'Building house', '6 mouth', 'in work', 3);
