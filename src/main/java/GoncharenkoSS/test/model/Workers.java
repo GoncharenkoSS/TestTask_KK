@@ -7,7 +7,7 @@ public class Workers {
     private String name;
     private String position;
     private String avatar;
-    private List<ShortTask> listTasks;
+    private List<Tasks> listTasks;
 
     public Workers(String name, String position, String avatar) {
 
@@ -49,11 +49,11 @@ public class Workers {
         this.avatar = avatar;
     }
 
-    public List<ShortTask> getListTasks() {
+    public List<Tasks> getListTasks() {
         return listTasks;
     }
 
-    public void setListTasks(List<ShortTask> listTasks) {
+    public void setListTasks(List<Tasks> listTasks) {
         this.listTasks = listTasks;
     }
 

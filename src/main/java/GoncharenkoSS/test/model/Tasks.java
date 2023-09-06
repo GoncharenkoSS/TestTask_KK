@@ -1,5 +1,8 @@
 package GoncharenkoSS.test.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Tasks {
     private int id;
     private String title;

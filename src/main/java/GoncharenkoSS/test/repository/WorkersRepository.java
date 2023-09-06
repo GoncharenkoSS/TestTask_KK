@@ -1,7 +1,5 @@
 package GoncharenkoSS.test.repository;
 
-
-import GoncharenkoSS.test.model.ShortTask;
 import GoncharenkoSS.test.model.Tasks;
 import GoncharenkoSS.test.model.Workers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +8,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,8 +32,8 @@ public class WorkersRepository {
             Workers workers = jdbcTemplate.queryForObject("SELECT * FROM workers WHERE id=?",
                     BeanPropertyRowMapper.newInstance(Workers.class), id);
 
-            List<ShortTask> tasks = jdbcTemplate.query("SELECT title, description, status FROM tasks WHERE performer=?",
-                    BeanPropertyRowMapper.newInstance(ShortTask.class), id);
+            List<Tasks> tasks = jdbcTemplate.query("SELECT title, description, status FROM tasks WHERE performer=?",
+                    BeanPropertyRowMapper.newInstance(Tasks.class), id);
 
             assert workers != null;
             workers.setListTasks(tasks);
@@ -56,6 +53,16 @@ public class WorkersRepository {
 
     public int deleteAll() {
         return jdbcTemplate.update("DELETE from workers");
+    }
+
+    public Workers findByName(String name) {
+        try {
+            Workers workers = jdbcTemplate.queryForObject("SELECT * FROM workers WHERE name=?",
+                    BeanPropertyRowMapper.newInstance(Workers.class), name);
+            return workers;
+        } catch (IncorrectResultSizeDataAccessException e) {
+            return null;
+        }
     }
 }
 

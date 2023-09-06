@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,8 @@ public class WorkersController {
                 workersRepository.findAll().forEach(workers::add);
 
             if (workers.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                throw new ResponseStatusException(
+                        HttpStatus.NO_CONTENT, "no content");
             }
 
             return new ResponseEntity<>(workers, HttpStatus.OK);
@@ -43,7 +45,8 @@ public class WorkersController {
         if (workers != null) {
             return new ResponseEntity<>(workers, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found");
         }
     }
 
