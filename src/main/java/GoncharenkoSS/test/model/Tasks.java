@@ -1,13 +1,18 @@
 package GoncharenkoSS.test.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotEmpty;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Tasks {
     private int id;
+    @NotEmpty(message = "Title should not be empty")
     private String title;
+    @NotEmpty(message = "Description should not be empty")
     private String description;
+    @NotEmpty(message = "Description should not be empty")
     private String time;
+    @NotEmpty(message = "Time should not be empty")
     private String status;
     private int performer;
 

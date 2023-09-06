@@ -4,11 +4,16 @@ import GoncharenkoSS.test.model.Tasks;
 import GoncharenkoSS.test.model.Workers;
 import GoncharenkoSS.test.repository.TasksRepository;
 import GoncharenkoSS.test.repository.WorkersRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:8080")
 @RestController
@@ -34,6 +39,26 @@ public class TaskController {
             return new ResponseEntity<>("Cannot worker with name=" + workers.getName(), HttpStatus.NOT_FOUND);
         }
     }
+    @PatchMapping("/change-task/{id}")
+    public ResponseEntity<String> changeTask(@PathVariable("id") int id, @RequestBody @Valid Tasks tasks,
+                                             BindingResult bindingResult) {
+        Tasks task = tasksRepository.findById(id);
+
+        if(bindingResult.hasErrors()) {
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            return new ResponseEntity<>(errors.get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST);
+        }
+        else if (task != null) {
+            task.setTitle(tasks.getTitle());
+            task.setDescription(tasks.getDescription());
+            task.setTime(tasks.getTime());
+            task.setStatus(tasks.getStatus());
+            tasksRepository.update(task);
+            return new ResponseEntity<>(  "Task =" + tasks.getTitle() + "= successfully updated.", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Cannot task with id=" + id, HttpStatus.NOT_FOUND);
+        }
+    }
 
     @GetMapping("/tasks/{id}")
     public ResponseEntity<Tasks> getTaskById(@PathVariable("id") int id) {
@@ -44,6 +69,21 @@ public class TaskController {
         } else {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "entity not found");
+        }
+    }
+
+    @GetMapping("/tasks")
+    public ResponseEntity<List<Tasks>> getAllTasks() {
+        try {
+            List<Tasks> tasks = tasksRepository.findAll();
+
+            if (tasks.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.NO_CONTENT, "no content");
+            }
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

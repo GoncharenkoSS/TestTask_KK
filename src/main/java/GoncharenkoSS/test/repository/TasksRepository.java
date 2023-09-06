@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+
 @Repository
 public class TasksRepository {
 
@@ -22,13 +23,18 @@ public class TasksRepository {
 
     public Tasks findById(int id) {
         try {
-            Tasks tasks = jdbcTemplate.queryForObject("SELECT * FROM tasks WHERE id=?",
+            return jdbcTemplate.queryForObject("SELECT * FROM tasks WHERE id=?",
                     BeanPropertyRowMapper.newInstance(Tasks.class), id);
-
-            return tasks;
         } catch (IncorrectResultSizeDataAccessException e) {
             return null;
         }
     }
+    public int update(Tasks tasks) {
+        return jdbcTemplate.update("UPDATE tasks SET title=?, description=?, time=?, status=? WHERE id=?",
+                tasks.getTitle(), tasks.getDescription(), tasks.getTime(), tasks.getStatus(),tasks.getId());
 
+    }
+    public List<Tasks> findAll() {
+        return jdbcTemplate.query("SELECT id, title, status from tasks", BeanPropertyRowMapper.newInstance(Tasks.class));
+    }
 }

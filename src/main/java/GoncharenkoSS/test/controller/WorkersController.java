@@ -2,9 +2,12 @@ package GoncharenkoSS.test.controller;
 
 import GoncharenkoSS.test.model.Workers;
 import GoncharenkoSS.test.repository.WorkersRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,18 +23,14 @@ public class WorkersController {
     WorkersRepository workersRepository;
 
     @GetMapping("/workers")
-    public ResponseEntity<List<Workers>> getAllWorkers(@RequestParam(required = false) String name) {
+    public ResponseEntity<List<Workers>> getAllWorkers() {
         try {
-            List<Workers> workers = new ArrayList<>();
-
-            if (name == null)
-                workersRepository.findAll().forEach(workers::add);
+            List<Workers> workers = workersRepository.findAll();
 
             if (workers.isEmpty()) {
                 throw new ResponseStatusException(
                         HttpStatus.NO_CONTENT, "no content");
             }
-
             return new ResponseEntity<>(workers, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -51,29 +50,39 @@ public class WorkersController {
     }
 
     @PostMapping("/workers")
-    public ResponseEntity<String> createWorker(@RequestBody Workers workers) {
-        try {
-            workersRepository.save(new Workers(workers.getName(), workers.getPosition(), workers.getAvatar()));
-            return new ResponseEntity<>("Worker was created successfully.", HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> createWorker(@RequestBody @Valid Workers workers, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            return new ResponseEntity<>(errors.get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST);
+        }else {
+            try {
+                workersRepository.save(new Workers(workers.getName(), workers.getPosition(), workers.getAvatar()));
+                return new ResponseEntity<>("Worker was created successfully.", HttpStatus.CREATED);
+            } catch (Exception e) {
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
-    @PutMapping("/workers/{id}")
-    public ResponseEntity<String> updateWorker(@PathVariable("id") int id, @RequestBody Workers workers) {
-        Workers work = workersRepository.findById(id);
+    @PatchMapping("/workers/{id}")
+    public ResponseEntity<String> updateWorker(@PathVariable("id") int id, @RequestBody @Valid Workers workers,
+                                               BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            return new ResponseEntity<>(errors.get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST);
+        }else {
+            Workers work = workersRepository.findById(id);
 
-        if (work != null) {
-            work.setId(id);
-            work.setName(workers.getName());
-            work.setPosition(workers.getPosition());
-            work.setAvatar(workers.getAvatar());
+            if (work != null) {
+                work.setName(workers.getName());
+                work.setPosition(workers.getPosition());
+                work.setAvatar(workers.getAvatar());
 
-            workersRepository.update(work);
-            return new ResponseEntity<>("Worker was updated successfully.", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Cannot find Worker with id=" + id, HttpStatus.NOT_FOUND);
+                workersRepository.update(work);
+                return new ResponseEntity<>("Worker was updated successfully.", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Cannot find Worker with id=" + id, HttpStatus.NOT_FOUND);
+            }
         }
     }
 

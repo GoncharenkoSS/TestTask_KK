@@ -1,11 +1,16 @@
 package GoncharenkoSS.test.model;
 
+import jakarta.validation.constraints.NotEmpty;
+
 import java.util.List;
 
 public class Workers {
     private int id;
+    @NotEmpty(message = "Name should not be empty")
     private String name;
+    @NotEmpty(message = "Position should not be empty")
     private String position;
+    @NotEmpty(message = "Avatar should not be empty")
     private String avatar;
     private List<Tasks> listTasks;
 
