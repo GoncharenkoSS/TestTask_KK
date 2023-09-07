@@ -49,7 +49,7 @@ public class WorkersRepository {
 
     public List<Workers> findAll() {
         List<Workers> workersList = jdbcTemplate.query("SELECT * from workers", BeanPropertyRowMapper.newInstance(Workers.class));
-        if(!workersList.isEmpty()) {
+        if (!workersList.isEmpty()) {
             for (Workers worker : workersList) {
                 List<Tasks> tasks = jdbcTemplate.query("SELECT title, description, status FROM tasks WHERE performer=?",
                         BeanPropertyRowMapper.newInstance(Tasks.class), worker.getId());

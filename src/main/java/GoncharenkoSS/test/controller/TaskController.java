@@ -1,5 +1,7 @@
 package GoncharenkoSS.test.controller;
 
+import GoncharenkoSS.test.Services.ServiceErrors;
+import GoncharenkoSS.test.Services.ServiceQueue;
 import GoncharenkoSS.test.model.Tasks;
 import GoncharenkoSS.test.model.Workers;
 import GoncharenkoSS.test.repository.TasksRepository;
@@ -9,52 +11,61 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @RequestMapping("/api")
 public class TaskController {
 
+    private final TasksRepository tasksRepository;
+    private final WorkersRepository workersRepository;
+    private final ServiceErrors serviceErrors;
+    private  final ServiceQueue serviceQueue;
+
     @Autowired
-    TasksRepository tasksRepository;
-    @Autowired
-    WorkersRepository workersRepository;
+    public TaskController(TasksRepository tasksRepository, WorkersRepository workersRepository, ServiceErrors serviceErrors, ServiceQueue serviceQueue) {
+        this.tasksRepository = tasksRepository;
+        this.workersRepository = workersRepository;
+        this.serviceErrors = serviceErrors;
+        this.serviceQueue = serviceQueue;
+    }
 
     @PatchMapping("/tasks/{id}")
-    public ResponseEntity<String> assignTask(@PathVariable("id") int id, @RequestBody Workers workers) {
-        if(tasksRepository.findById(id)==null)
+    public ResponseEntity<String> assignTask(@PathVariable("id") int id, @RequestBody @Valid Workers workers,
+                                             BindingResult bindingResult) {
+        if (bindingResult.hasErrors())
+            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+
+        if (tasksRepository.findById(id) == null)
             return new ResponseEntity<>("Cannot task with id=" + id, HttpStatus.NOT_FOUND);
 
         Workers work = workersRepository.findByName(workers.getName());
 
         if (work != null) {
             tasksRepository.assignWorker(id, work.getId());
-            return new ResponseEntity<>(  workers.getName() + " successfully assigned to task.", HttpStatus.OK);
+            return new ResponseEntity<>(workers.getName() + " successfully assigned to task.", HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Cannot worker with name=" + workers.getName(), HttpStatus.NOT_FOUND);
         }
     }
+
     @PatchMapping("/change-task/{id}")
     public ResponseEntity<String> changeTask(@PathVariable("id") int id, @RequestBody @Valid Tasks tasks,
                                              BindingResult bindingResult) {
         Tasks task = tasksRepository.findById(id);
 
-        if(bindingResult.hasErrors()) {
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            return new ResponseEntity<>(errors.get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST);
-        }
-        else if (task != null) {
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+        } else if (task != null) {
             task.setTitle(tasks.getTitle());
             task.setDescription(tasks.getDescription());
             task.setTime(tasks.getTime());
             task.setStatus(tasks.getStatus());
             tasksRepository.update(task);
-            return new ResponseEntity<>(  "Task =" + tasks.getTitle() + "= successfully updated.", HttpStatus.OK);
+            return new ResponseEntity<>("Task =" + tasks.getTitle() + "= successfully updated.", HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Cannot task with id=" + id, HttpStatus.NOT_FOUND);
         }
@@ -84,6 +95,20 @@ public class TaskController {
             return new ResponseEntity<>(tasks, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/tasks")
+    public ResponseEntity<String> createTask(@RequestBody @Valid Tasks tasks, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+        }
+        else if (tasks==null) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        else {
+            serviceQueue.putInQueue(tasks);
+            return new ResponseEntity<>("Task was created successfully.", HttpStatus.CREATED);
         }
     }
 }

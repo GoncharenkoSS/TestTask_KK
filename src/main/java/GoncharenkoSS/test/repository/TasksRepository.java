@@ -8,6 +8,8 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 
@@ -29,12 +31,24 @@ public class TasksRepository {
             return null;
         }
     }
+
     public int update(Tasks tasks) {
         return jdbcTemplate.update("UPDATE tasks SET title=?, description=?, time=?, status=? WHERE id=?",
-                tasks.getTitle(), tasks.getDescription(), tasks.getTime(), tasks.getStatus(),tasks.getId());
+                tasks.getTitle(), tasks.getDescription(), tasks.getTime(), tasks.getStatus(), tasks.getId());
 
     }
+
     public List<Tasks> findAll() {
         return jdbcTemplate.query("SELECT id, title, status from tasks", BeanPropertyRowMapper.newInstance(Tasks.class));
+    }
+
+    public boolean save(Tasks tasks) {
+        try {
+            jdbcTemplate.update("INSERT INTO tasks (title, description, time, status) VALUES(?,?,?,?)",
+                    tasks.getTitle(), tasks.getDescription(), tasks.getTime(), tasks.getStatus());
+        } catch (Exception ex) {
+            return false;
+        }
+        return true;
     }
 }

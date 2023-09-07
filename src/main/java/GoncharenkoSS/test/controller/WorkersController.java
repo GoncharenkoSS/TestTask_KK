@@ -1,5 +1,6 @@
 package GoncharenkoSS.test.controller;
 
+import GoncharenkoSS.test.Services.ServiceErrors;
 import GoncharenkoSS.test.model.Workers;
 import GoncharenkoSS.test.repository.WorkersRepository;
 import jakarta.validation.Valid;
@@ -7,20 +8,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @RequestMapping("/api")
 public class WorkersController {
 
+    private final WorkersRepository workersRepository;
+    private final ServiceErrors serviceErrors;
+
     @Autowired
-    WorkersRepository workersRepository;
+    public WorkersController(WorkersRepository workersRepository, ServiceErrors serviceErrors) {
+        this.workersRepository = workersRepository;
+        this.serviceErrors = serviceErrors;
+    }
 
     @GetMapping("/workers")
     public ResponseEntity<List<Workers>> getAllWorkers() {
@@ -51,10 +55,9 @@ public class WorkersController {
 
     @PostMapping("/workers")
     public ResponseEntity<String> createWorker(@RequestBody @Valid Workers workers, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) {
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            return new ResponseEntity<>(errors.get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST);
-        }else {
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+        } else {
             try {
                 workersRepository.save(new Workers(workers.getName(), workers.getPosition(), workers.getAvatar()));
                 return new ResponseEntity<>("Worker was created successfully.", HttpStatus.CREATED);
@@ -67,10 +70,9 @@ public class WorkersController {
     @PatchMapping("/workers/{id}")
     public ResponseEntity<String> updateWorker(@PathVariable("id") int id, @RequestBody @Valid Workers workers,
                                                BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) {
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            return new ResponseEntity<>(errors.get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST);
-        }else {
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+        } else {
             Workers work = workersRepository.findById(id);
 
             if (work != null) {
