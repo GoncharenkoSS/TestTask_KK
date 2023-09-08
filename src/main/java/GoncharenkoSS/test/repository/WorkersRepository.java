@@ -14,8 +14,12 @@ import java.util.List;
 @Repository
 public class WorkersRepository {
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    public WorkersRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     public void save(Workers workers) {
         jdbcTemplate.update("INSERT INTO workers (name, position, avatar) VALUES(?,?,?)",
@@ -43,8 +47,13 @@ public class WorkersRepository {
         }
     }
 
-    public int deleteById(int id) {
-        return jdbcTemplate.update("DELETE FROM workers WHERE id=?", id);
+    public Workers findByName(String name) {
+        try {
+            return jdbcTemplate.queryForObject("SELECT * FROM workers WHERE name=?",
+                    BeanPropertyRowMapper.newInstance(Workers.class), name);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            return null;
+        }
     }
 
     public List<Workers> findAll() {
@@ -60,17 +69,12 @@ public class WorkersRepository {
         return null;
     }
 
-    public int deleteAll() {
-        return jdbcTemplate.update("DELETE from workers");
+    public int deleteById(int id) {
+        return jdbcTemplate.update("DELETE FROM workers WHERE id=?", id);
     }
 
-    public Workers findByName(String name) {
-        try {
-            return jdbcTemplate.queryForObject("SELECT * FROM workers WHERE name=?",
-                    BeanPropertyRowMapper.newInstance(Workers.class), name);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            return null;
-        }
+    public int deleteAll() {
+        return jdbcTemplate.update("DELETE from workers");
     }
 }
 

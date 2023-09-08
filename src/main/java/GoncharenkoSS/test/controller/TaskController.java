@@ -14,6 +14,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Time;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -31,11 +33,9 @@ public class TaskController implements ServiceQueue {
         this.serviceErrors = serviceErrors;
     }
 
+    //Метод назначает исполнителя на задачу по имени.
     @PatchMapping("/tasks/{id}")
-    public ResponseEntity<String> assignTask(@PathVariable("id") int id, @RequestBody @Valid Workers workers,
-                                             BindingResult bindingResult) {
-        if (bindingResult.hasErrors())
-            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> assignTask(@PathVariable("id") int id, @RequestBody Workers workers) {
 
         if (tasksRepository.findById(id) == null)
             return new ResponseEntity<>("Cannot task with id=" + id, HttpStatus.NOT_FOUND);
@@ -50,17 +50,18 @@ public class TaskController implements ServiceQueue {
         }
     }
 
+    //Метод меняющий задачу по ID (все кроме id и performer).
     @PatchMapping("/change-task/{id}")
     public ResponseEntity<String> changeTask(@PathVariable("id") int id, @RequestBody @Valid Tasks tasks,
                                              BindingResult bindingResult) {
         Tasks task = tasksRepository.findById(id);
 
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.FORBIDDEN);
         } else if (task != null) {
             task.setTitle(tasks.getTitle());
             task.setDescription(tasks.getDescription());
-            task.setTime(tasks.getTime());
+            task.setTime(Time.valueOf(LocalTime.now()));
             task.setStatus(tasks.getStatus());
             tasksRepository.update(task);
             return new ResponseEntity<>("Task =" + tasks.getTitle() + "= successfully updated.", HttpStatus.OK);
@@ -69,6 +70,7 @@ public class TaskController implements ServiceQueue {
         }
     }
 
+    //Поиск задачи по ID.
     @GetMapping("/tasks/{id}")
     public ResponseEntity<Tasks> getTaskById(@PathVariable("id") int id) {
         Tasks tasks = tasksRepository.findById(id);
@@ -76,11 +78,11 @@ public class TaskController implements ServiceQueue {
         if (tasks != null) {
             return new ResponseEntity<>(tasks, HttpStatus.OK);
         } else {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    //Получить список всех задач.
     @GetMapping("/tasks")
     public ResponseEntity<List<Tasks>> getAllTasks() {
         try {
@@ -96,19 +98,23 @@ public class TaskController implements ServiceQueue {
         }
     }
 
+    //Создать задачу
     @PostMapping("/tasks")
     public ResponseEntity<String> createTask(@RequestBody @Valid Tasks tasks, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.FORBIDDEN);
         } else if (tasks == null) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
             tasksQueue.add(tasks);
-                executorService.execute(() -> {
-                    if (!tasksQueue.isEmpty()) {
-                        if (tasksRepository.save(tasksQueue.peek())) tasksQueue.remove();
-                    }
-                });
+            System.out.println(tasksQueue);
+            executorService.execute(() -> {
+                if (!tasksQueue.isEmpty()) {
+                    if (tasksRepository.save(tasksQueue.peek())) tasksQueue.remove();
+                    System.out.println(tasksQueue);
+                }
+            });
+            System.out.println(tasksQueue);
             return new ResponseEntity<>("Task was created successfully.", HttpStatus.CREATED);
         }
     }

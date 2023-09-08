@@ -3,20 +3,21 @@ package GoncharenkoSS.test.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotEmpty;
 
+import java.sql.Time;
+
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Tasks {
     private int id;
-    @NotEmpty(message = "Title should not be empty")
+    @NotEmpty(message = "Field Title should not be empty")
     private String title;
-    @NotEmpty(message = "Description should not be empty")
+    @NotEmpty(message = "Field Description should not be empty")
     private String description;
-    @NotEmpty(message = "Description should not be empty")
-    private String time;
-    @NotEmpty(message = "Time should not be empty")
+    private Time time;
+    @NotEmpty(message = "Field Time should not be empty")
     private String status;
     private int performer;
 
-    public Tasks(int id, String title, String description, String time, String status, int performer) {
+    public Tasks(int id, String title, String description, Time time, String status, int performer) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -24,7 +25,9 @@ public class Tasks {
         this.status = status;
         this.performer = performer;
     }
-    public Tasks(){}
+
+    public Tasks() {
+    }
 
     public int getId() {
         return id;
@@ -50,11 +53,11 @@ public class Tasks {
         this.description = description;
     }
 
-    public String getTime() {
+    public Time getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(Time time) {
         this.time = time;
     }
 
@@ -66,11 +69,4 @@ public class Tasks {
         this.status = status;
     }
 
-    public int getPerformer() {
-        return performer;
-    }
-
-    public void setPerformer(int performer) {
-        this.performer = performer;
-    }
 }

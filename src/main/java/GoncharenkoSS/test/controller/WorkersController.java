@@ -26,14 +26,14 @@ public class WorkersController {
         this.serviceErrors = serviceErrors;
     }
 
+    //Получить список всех работников.
     @GetMapping("/workers")
     public ResponseEntity<List<Workers>> getAllWorkers() {
         try {
             List<Workers> workers = workersRepository.findAll();
 
             if (workers.isEmpty()) {
-                throw new ResponseStatusException(
-                        HttpStatus.NO_CONTENT, "no content");
+                throw new ResponseStatusException(HttpStatus.NO_CONTENT);
             }
             return new ResponseEntity<>(workers, HttpStatus.OK);
         } catch (Exception e) {
@@ -41,6 +41,7 @@ public class WorkersController {
         }
     }
 
+    //Найти работника по ID.
     @GetMapping("/workers/{id}")
     public ResponseEntity<Workers> getWorkerById(@PathVariable("id") int id) {
         Workers workers = workersRepository.findById(id);
@@ -48,18 +49,18 @@ public class WorkersController {
         if (workers != null) {
             return new ResponseEntity<>(workers, HttpStatus.OK);
         } else {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
 
+    //Создать работника.
     @PostMapping("/workers")
     public ResponseEntity<String> createWorker(@RequestBody @Valid Workers workers, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.FORBIDDEN);
         } else {
             try {
-                workersRepository.save(new Workers(workers.getName(), workers.getPosition(), workers.getAvatar()));
+                workersRepository.save(workers);
                 return new ResponseEntity<>("Worker was created successfully.", HttpStatus.CREATED);
             } catch (Exception e) {
                 return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -67,11 +68,12 @@ public class WorkersController {
         }
     }
 
+    //Обновить данные о работнике по ID.
     @PatchMapping("/workers/{id}")
     public ResponseEntity<String> updateWorker(@PathVariable("id") int id, @RequestBody @Valid Workers workers,
                                                BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.FORBIDDEN);
         } else {
             Workers work = workersRepository.findById(id);
 
@@ -88,12 +90,13 @@ public class WorkersController {
         }
     }
 
+    //Удалить работника по ID.
     @DeleteMapping("/workers/{id}")
     public ResponseEntity<String> deleteWorker(@PathVariable("id") int id) {
         try {
             int result = workersRepository.deleteById(id);
             if (result == 0) {
-                return new ResponseEntity<>("Cannot find worker with id=" + id, HttpStatus.OK);
+                return new ResponseEntity<>("Cannot find worker with id=" + id, HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>("Worker was deleted successfully.", HttpStatus.OK);
         } catch (Exception e) {
@@ -101,6 +104,7 @@ public class WorkersController {
         }
     }
 
+    //Удалить всех работников.
     @DeleteMapping("/workers")
     public ResponseEntity<String> deleteAllWorkers() {
         try {
