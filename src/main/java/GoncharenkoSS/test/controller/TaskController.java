@@ -107,14 +107,11 @@ public class TaskController implements ServiceQueue {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
             tasksQueue.add(tasks);
-            System.out.println(tasksQueue);
             executorService.execute(() -> {
                 if (!tasksQueue.isEmpty()) {
                     if (tasksRepository.save(tasksQueue.peek())) tasksQueue.remove();
-                    System.out.println(tasksQueue);
                 }
             });
-            System.out.println(tasksQueue);
             return new ResponseEntity<>("Task was created successfully.", HttpStatus.CREATED);
         }
     }
