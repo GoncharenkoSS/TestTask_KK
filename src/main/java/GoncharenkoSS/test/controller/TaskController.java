@@ -18,19 +18,17 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-public class TaskController {
+public class TaskController implements ServiceQueue {
 
     private final TasksRepository tasksRepository;
     private final WorkersRepository workersRepository;
     private final ServiceErrors serviceErrors;
-    private  final ServiceQueue serviceQueue;
 
     @Autowired
-    public TaskController(TasksRepository tasksRepository, WorkersRepository workersRepository, ServiceErrors serviceErrors, ServiceQueue serviceQueue) {
+    public TaskController(TasksRepository tasksRepository, WorkersRepository workersRepository, ServiceErrors serviceErrors) {
         this.tasksRepository = tasksRepository;
         this.workersRepository = workersRepository;
         this.serviceErrors = serviceErrors;
-        this.serviceQueue = serviceQueue;
     }
 
     @PatchMapping("/tasks/{id}")
@@ -102,12 +100,15 @@ public class TaskController {
     public ResponseEntity<String> createTask(@RequestBody @Valid Tasks tasks, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(serviceErrors.returnErrors(bindingResult), HttpStatus.BAD_REQUEST);
-        }
-        else if (tasks==null) {
+        } else if (tasks == null) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        else {
-            serviceQueue.putInQueue(tasks);
+        } else {
+            tasksQueue.add(tasks);
+                executorService.execute(() -> {
+                    if (!tasksQueue.isEmpty()) {
+                        if (tasksRepository.save(tasksQueue.peek())) tasksQueue.remove();
+                    }
+                });
             return new ResponseEntity<>("Task was created successfully.", HttpStatus.CREATED);
         }
     }

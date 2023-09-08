@@ -42,7 +42,7 @@ public class TasksRepository {
         return jdbcTemplate.query("SELECT id, title, status from tasks", BeanPropertyRowMapper.newInstance(Tasks.class));
     }
 
-    public boolean save(Tasks tasks) {
+    public synchronized boolean save(Tasks tasks) {
         try {
             jdbcTemplate.update("INSERT INTO tasks (title, description, time, status) VALUES(?,?,?,?)",
                     tasks.getTitle(), tasks.getDescription(), tasks.getTime(), tasks.getStatus());
