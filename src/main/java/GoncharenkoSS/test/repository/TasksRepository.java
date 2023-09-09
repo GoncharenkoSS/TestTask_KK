@@ -44,13 +44,8 @@ public class TasksRepository {
                 tasks.getTitle(), tasks.getDescription(), tasks.getTime(), tasks.getStatus(), tasks.getId());
     }
 
-    public boolean save(Tasks tasks) {
-        try {
+    public void save(Tasks tasks) {
             jdbcTemplate.update("INSERT INTO tasks (title, description, time, status) VALUES(?,?,?,?)",
-                    tasks.getTitle(), tasks.getDescription(), Time.valueOf(LocalTime.now()), tasks.getStatus());
-        } catch (Exception ex) {
-            return false;
-        }
-        return true;
+                    tasks.getTitle(), tasks.getDescription(), tasks.getTime(), tasks.getStatus());
     }
 }
