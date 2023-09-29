@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Time;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -110,20 +111,18 @@ public class TaskController implements ServiceQueue {
         } else {
             tasks.setTime(Time.valueOf(LocalTime.now()));
             tasksQueue.offer(tasks);
-
-            if (tasksQueue.size() > 10) {
-                ExecutorService executorService = Executors.newFixedThreadPool(3);
-                executorService.submit(() -> {
+            ExecutorService executorService = Executors.newFixedThreadPool(3);
                     do {
-                        try {
-                            tasksRepository.save(tasksQueue.take());
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    } while (!tasksQueue.isEmpty());
-                });
+                        executorService.submit(() -> {
+                            try {
+                                tasksRepository.save(tasksQueue.take());
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    }while (!tasksQueue.isEmpty());
                 executorService.shutdown();
-            }
+
             return new ResponseEntity<>("Task was created successfully.", HttpStatus.CREATED);
         }
     }
